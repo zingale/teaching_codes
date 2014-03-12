@@ -1,0 +1,44 @@
+! compute the truncated Taylor expansion of e**x
+
+program taylor
+
+  implicit none
+
+  double precision :: sum
+  double precision :: a
+  double precision :: x
+
+  integer :: j
+
+  sum = 0.d0
+  a = 1.d0
+  x = -24.d0
+
+  j = 0
+  do while (abs(a) > 1.d-20)
+
+     sum = sum + a
+     a = a*(x/(j+1))
+     print *, j, a
+     j = j+1
+  enddo
+
+  print *, 'j = ', j
+  print *, 'S(-24) = ', sum, ' true = ', exp(x), ' error = ', abs(sum - exp(x))
+
+
+  ! now compute e**(-1)
+  sum = 0.d0
+  a = 1.d0
+  
+  j = 0
+  do while (abs(a) > 1.d-20)
+
+     sum = sum + a
+     a = a*(1.d0/(j+1))
+     j = j+1
+  enddo
+
+  print *, 'S(-1) = ', sum, ' S(-1)**24 = ', sum**x, ' exp(-24) = ', exp(x)
+
+end program taylor
