@@ -1,0 +1,12 @@
+A demonstration of different upwind methods of discretizing Burger's equation.
+
+Conservative differencing:
+
+        unew(i) = u(i) - cfl*(0.5*u(i)*u(i) - 0.5*u(i-1)*u(i-1))
+
+gives the correct shock speed, whereas non-conservative differencing:
+
+        unew(i) = u(i) - cfl*u(i)*(u(i) - u(i-1))
+
+gives a slower shock speed.
+

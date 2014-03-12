@@ -1,0 +1,209 @@
+program advect
+
+  ! implement 1-d implicit (backward-Euler) diffusion of a Gaussian
+  ! with Neumann BCs on a cell-centered grid.
+  !
+  ! For the cell-centered grid variables, the overall grid looks like this:
+  !
+  !    
+  !    |     |      |     X     |     |      |     |     X     |      |     |
+  !    +--*--+- // -+--*--X--*--+--*--+- // -+--*--+--*--X--*--+- // -+--*--+
+  !      -ng          -1     0     1           ...  nx-1    nx        nx+ng-1
+  !                        (lo)                     (hi)    
+  !    |                  |                              |                  |
+  !    |<- ng ghostcells->|<---- nx interior zones ----->|<- ng ghostcells->|
+  !    |                  |                              |                  |
+  !
+  ! Our discretization is:
+  !
+  !   n+1    n         n+1   n+1
+  !  a_i  - a_i       a_i - a_{i-1}
+  !  ----------- =  u --------------
+  !      dt               dx
+  !
+  ! defining C = u dt/dx, this is
+  !
+  !          n+1       n+1       n
+  ! (1 + C) a_i   - C a_{i-1} = a_i
+  !
+  ! This is a bi-diagonal matrix.  Periodic BCs are implemented via
+  ! ghost-cells
+
+  implicit none
+
+  integer :: nx
+
+  double precision :: t, dt, tmax
+
+  double precision :: xmin, xmax, xcenter, dx
+  integer :: lo, hi
+
+  double precision :: Cfactor, cfl, u
+
+  double precision :: a_true, a_exact
+
+  double precision, allocatable :: a(:), b(:), c(:), f(:)
+  double precision, allocatable :: a_new(:), a_old(:)
+  double precision, allocatable :: x(:)
+
+  
+  integer :: i
+
+  ! set parameters
+  nx = 128
+
+  cfl = 1.5d0
+  tmax = 1.0d0
+  u = 1.0d0
+
+  xmin = 0.0d0
+  xmax = 1.0d0
+
+
+
+  ! initialize the grid properties -- 1 ghost cell
+  dx = (xmax - xmin)/nx
+  xcenter = 0.5d0*(xmin + xmax)
+
+  lo = 0
+  hi = nx-1
+
+  allocate(x(lo-1:hi+1))
+  do i = lo-1, hi+1
+     x(i) = xmin + dble(i + 0.5d0)*dx
+  enddo
+
+
+  ! initialize
+  allocate(a_old(lo-1:hi+1))
+  allocate(a_new(lo-1:hi+1))
+
+  do i = lo-1, hi+1
+     a_old(i) = a_exact(x(i), xcenter)
+  enddo
+
+
+  ! allocate array and RHS
+  allocate(a(lo-1:hi+1), b(lo-1:hi+1), c(lo-1:hi+1), f(lo-1:hi+1))
+
+
+  ! evolution loop
+  t = 0.0d0
+  do while (t < tmax)
+
+     ! fill ghostcells -- periodic
+     a_old(hi+1) = a_old(lo)
+     a_old(lo-1) = a_old(hi)
+
+     ! get timestep
+     dt = cfl * dx/u
+     if (t + dt > tmax) dt = tmax - t
+
+     Cfactor = u*dt/dx
+
+     ! setup the matrix and RHS
+     a(:) = 0.0d0
+     b(:) = 0.0d0
+     c(:) = 0.0d0
+
+     ! left ghost cell
+     b(lo-1) = 1.0d0
+     
+     ! interior
+     do i = lo, hi
+        a(i) = -Cfactor
+        b(i) = 1.0d0 + Cfactor
+        c(i) = 0.0d0
+     enddo
+
+     ! right ghost cell
+     b(hi+1) = 1.0d0 
+
+     
+     ! RHS
+     f(:) = a_old(:)
+
+
+     ! solve A phi = b
+     call tridiag(a, b, c, f, a_new, nx+2)
+
+     a_old(:) = a_new(:)
+
+     t = t + dt
+
+  enddo
+
+  ! output -- compare with the analytic solution
+  do i = lo, hi
+     a_true = a_exact(x(i), xcenter)
+     print *, x(i), a_true, a_new(i)
+  enddo
+
+end program advect
+
+
+function a_exact(x, xcenter)
+
+  implicit none
+
+  double precision :: x, xcenter
+  double precision :: a_exact
+
+  if (x > 0.333d0 .and. x < 0.666d0) then
+     a_exact = 1.d0
+  else
+     a_exact = 0.d0
+  endif
+
+  return
+end function a_exact
+  
+  
+subroutine tridiag(a,b,c,r,u,n)
+
+  ! tridiagonal solver (from BoxLib and/or NR)
+  !
+  ! a_i u_{i-1} + b_i u_i + c_i x_{i+1} = r_i
+  !
+
+  implicit none
+
+  integer         , intent(in   ) ::  n
+  double precision, intent(in   ) :: a(n), b(n), c(n), r(n)
+  double precision, intent(inout) :: u(n)
+
+  integer j
+  double precision, allocatable :: gam(:)
+  double precision :: bet
+
+  allocate(gam(n))
+
+  if (b(1) == 0.0d0) then
+     print *, 'tridiag: CANT HAVE B(1) = ZERO'
+     stop
+  endif
+
+  bet = b(1)
+
+  print *, 'in tridiag: ', bet
+
+  u(1) = r(1)/bet
+
+  do j = 2,n
+     gam(j) = c(j-1)/bet
+     bet = b(j) - a(j)*gam(j)
+
+     if (bet == 0.0) then
+        print *, 'tridiag: TRIDIAG FAILED'
+        stop
+     endif
+
+     u(j) = (r(j)-a(j)*u(j-1))/bet
+  end do
+
+  do j = n-1,1,-1
+     u(j) = u(j) - gam(j+1)*u(j+1)
+  end do
+
+end subroutine tridiag
+

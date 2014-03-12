@@ -1,0 +1,5 @@
+an example illustrating the different routines needed for a general
+finite-volume hydrodynamics program.
+
+This is for the ``how to write a hydro program'' class
+

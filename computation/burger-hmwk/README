@@ -1,0 +1,5 @@
+example finite-difference implementations of Burger's equation using
+both conservative and non-conservative differencing.
+
+The non-conservative differencing gets the wrong shock speed.
+

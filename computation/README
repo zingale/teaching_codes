@@ -1,0 +1,133 @@
+advection
+
+  solve the linear advection equation using upwind and FTCS and
+  some 2nd order methods (L-W, L-F, ...) on a finite-volume grid.
+  This is the routine that was used to make the plots in the 
+  advection lecture -- even though that lecture focused on finite-
+  difference methods.
+
+
+advection-fd
+
+  solve the advection equation on a finite-difference mesh -- this
+  was done just to give the students an example program that does
+  ftcs on a finite-difference mesh.
+
+
+advection-secondorder
+
+  solve the linear advection equation on a finite-volume mesh using
+  modern slope-limiting methods.
+
+
+burger-hmwk
+
+  solve Burger's equation in a conserved and non-conservative differencing
+  on a finite-difference mesh.  This is the solution to the homework.
+
+
+burgers
+
+  conservative and non-conservative first-order differencing of Burger's 
+  equation on a finite-volume mesh.  This was the first attempt at coding
+  this up, before switching over to a finite-diffrence mesh for their
+  homework.
+
+
+burgers-secondorder
+
+  solve Burger's equation using 2nd order slope limiting methods.
+
+
+derivative
+
+  compute the error in different difference approximations to first
+  derivatives
+
+
+epsilon
+
+  compute machine epsilon
+
+
+exponental_roundoff
+
+   show how important a role roundoff error plays in computing the
+   exponentation of a large negative number.  This was used in the 
+   numerics lecture.
+
+
+general-fv
+
+   a general, clean implementation of second-order slope limiting
+   finite-volume methods for the advection equation.  
+
+
+godunov
+
+   solve the Euler equations using Godunov's method and a 2-shock
+   Riemann solver.
+
+
+godunov-c
+
+   solve the Euler equations using Godunov's method and a 2-shock
+   Riemann solver.  Here, the Riemann solver is written in C.
+
+
+lane_emden
+
+   integrate the Lane-Emden equations.  This is done as a homework
+   assignment.  These codes are used to demonstrate the convergence
+   rate of the different methods.
+
+
+lw-burger
+
+   solve Burger's equation using the Lax-Wendroff method on a finite
+   difference grid.
+
+
+multigrid
+
+   a multigrid V-cycle example.
+
+
+orbit
+
+   compute the orbit of the Earth around the Sun.  This shows that low
+   order methods do a poor job.  This code was used in the numerical
+   integration lecture.
+
+
+ppm_plot
+
+   some first hacks at plotting what goes on in PPM -- never used.
+
+
+relaxation
+
+   pure relaxation applied to an elliptic problem.  This was used in 
+   the first of the multigrid lectures.
+
+
+riemann_exact
+
+   The exact Riemann solver from Toro.
+
+
+riemann_plot
+
+   Given a Riemann problem, plot the shock and rarefaction
+   curves passing through the left and right states.  This is a 
+   graphical way of solving the Riemann problem.
+
+
+solar_wind
+
+   some hacks at solving the equations describing the solar wind.
+
+
+summation
+
+  an attempt at demonstrating roundoff error through summation.
