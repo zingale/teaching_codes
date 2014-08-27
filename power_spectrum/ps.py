@@ -29,14 +29,9 @@ A_0 = 1000.0
 # first pass -- count how many hits each k gets
 weights = {}
 
-m = 1
-while m < modes:
-
-    n = 1
-    while n < modes:
-
-        p = 1
-        while p < modes:
+for m in range(1,modes+1):
+    for n in range(1,modes+1):
+        for p in range(1,modes+1):
 
             ii2 = m**2 + n**2 + p**2
             
@@ -45,10 +40,6 @@ while m < modes:
             else:
                 weights[ii2] += 1
 
-            p += 1
-        n += 1
-    m += 1
-
 
 # amplitude of smallest k
 print "min{k_x} = ", 1/L[0]
@@ -56,17 +47,14 @@ print "amplitude of smallest k = ", A_0*np.sqrt(1/L[0]**2 + 1/L[1]**2 + 1/L[2]**
 
 
 # compute the function we will find the power spectrum of
-m = 1
-while m < modes:
+for m in range(1,modes+1):
     k_x = m/L[0]
-
     print "m = ", m
-    n = 1
-    while n < modes:
+
+    for n in range(1,modes+1):
         k_y = n/L[1]
 
-        p = 1
-        while p < modes:
+        for p in range(1,modes+1):
             k_z = p/L[2]
 
             ii2 = m**2 + n**2 + p**2
@@ -76,18 +64,18 @@ while m < modes:
             
             phi += A*np.sin(k_x*x3d + k_y*y3d + k_z*z3d)
 
-            p += 1
-        n += 1
-    m += 1
-
-
 
 # now do the power spectrum
-phi_hat = np.fft.fftn(phi)[0:N/2+1,0:N/2+1,0:N/2+1]
+phi_hat = np.fft.fftn(phi) #[0:N/2+1,0:N/2+1,0:N/2+1]
 #phi_hat = 8.0*phi_hat/N**3
 phi_hat = phi_hat/N**3
 
 phi_hat = abs(phi_hat)**2
+
+# Parseval's theorem: sum of |phi(x)|**2 = sum of |phi_hat(k)|**2
+print "sum of |phi(x)|**2    = {}".format(np.sum(phi))
+print "sum of |phihat(k)|**2 = {}".format(np.sum(phi_hat))
+print "DC Offset = {}".format(phi_hat[0,0,0])
 
 kx = np.fft.fftfreq(N)[0:N/2+1]
 kx[-1] *= -1
@@ -118,11 +106,10 @@ ncount = np.bincount(whichbin)
 
 E_spectrum = np.zeros(len(ncount)-1, dtype=np.float64)
 
-n = 1
-while n < len(ncount):
+for n in range(ncount):
     if not ncount[n] == 0: 
         E_spectrum[n-1] = np.sum(phi_hat.flat[whichbin==n]) #/ncount[n]
-    n += 1
+
 
 k = bins[1:n]
 E_spectrum = E_spectrum[0:len(k)]
