@@ -1,6 +1,7 @@
 # compute the odds of getting a given hand in straight 5-card poker.
 # M. Zingale
-# 2005-03-06
+
+from __future__ import print_function
 
 import random
 
@@ -14,16 +15,16 @@ class card:
         """ we want things order primarily by rank then suit """
         return self.suit + (self.rank-1)*14
 
-    def __cmp__(self, other):
-        return cmp(self.value(), other.value())
-    
+    def __lt__(self, other):
+        return self.value() < other.value()
+
     def __unicode__(self):
         suits = [u"\u2660",  # spade
                  u"\u2665",  # heart
                  u"\u2666",  # diamond
                  u"\u2663"]  # club
-        
-        r = `self.rank`
+
+        r = str(self.rank)
         if self.rank == 11:
             r = "J"
         elif self.rank == 12:
@@ -32,12 +33,12 @@ class card:
             r = "K"
         elif self.rank == 14:
             r = "A"
-                
+
         return r +':'+suits[self.suit-1]
 
     def __str__(self):
         return unicode(self).encode('utf-8')
-        
+
 
 class deck:
     """ the deck is a collection of cards """
@@ -66,7 +67,7 @@ class deck:
             hand.append(self.cards.pop())
 
         return hand
-    
+
     def __str__(self):
         string = ""
         for c in self.cards:
@@ -84,23 +85,23 @@ def play(nmax):
     nThreeOfAKind = 0
     nTwoPair = 0
     nOnePair = 0
-    
+
     for n in range(nmax):
 
         # create a deck
         mydeck = deck()
-        
+
         # shuffle
         mydeck.shuffle()
-        
+
         # get a hand
         hand = mydeck.getCards(5)
         hand.sort()
-        
+
         #print hand[0], hand[1], hand[2], hand[3], hand[4]
 
         found = False
-        
+
         # check for the different hands...
 
         # straight flush
@@ -135,7 +136,7 @@ def play(nmax):
             #print "<<< Four of a kind >>>\n"
             found = True
 
-                     
+
         # full house
 
         # we are sorted again, so make sure that the first two are equal
@@ -149,7 +150,7 @@ def play(nmax):
             #print "<<< Full house >>>\n"
             found = True
 
-        
+
         # flush
 
         # look for all the same suit
@@ -163,7 +164,7 @@ def play(nmax):
             #print "<<< Flush >>>\n"
             found = True
 
-        
+
         # straight
 
         # we are already sorted, so just look at the rank
@@ -177,7 +178,7 @@ def play(nmax):
             #print "<<< Straight >>>\n"
             found = True
 
-            
+
         # three of a kind
 
         # since we are sorted, only 0,1,2 or 1,2,3, or 2,3,4 can be
@@ -190,12 +191,12 @@ def play(nmax):
             #print "<<< Three of a kind >>>\n"
             found = True
 
-            
+
         # two pair and one pair
         if (not found):
 
             numPairs = 0
-            
+
             if (hand[0].rank == hand[1].rank):
                 numPairs += 1
 
@@ -219,22 +220,17 @@ def play(nmax):
                 found = True
 
 
-    print "Number of hands: ", nmax
-    print " "
-    print "  Straight Flush: ({:9d})  {}".format(nStraightFlush, nStraightFlush/float(nmax))
-    print "  Four of a kind: ({:9d})  {}".format(nFourOfAKind, nFourOfAKind/float(nmax))
-    print "  Full House:     ({:9d})  {}".format(nFullHouse, nFullHouse/float(nmax))
-    print "  Flush:          ({:9d})  {}".format(nFlush, nFlush/float(nmax))
-    print "  Straight:       ({:9d})  {}".format(nStraight, nStraight/float(nmax))
-    print "  Three of a kind:({:9d})  {}".format(nThreeOfAKind, nThreeOfAKind/float(nmax))
-    print "  Two pair:       ({:9d})  {}".format(nTwoPair, nTwoPair/float(nmax))
-    print "  One pair:       ({:9d})  {}".format(nOnePair, nOnePair/float(nmax))
-    
-    
+    print("Number of hands: ", nmax)
+    print(" ")
+    print("  Straight Flush: ({:9d})  {}".format(nStraightFlush, nStraightFlush/float(nmax)))
+    print("  Four of a kind: ({:9d})  {}".format(nFourOfAKind, nFourOfAKind/float(nmax)))
+    print("  Full House:     ({:9d})  {}".format(nFullHouse, nFullHouse/float(nmax)))
+    print("  Flush:          ({:9d})  {}".format(nFlush, nFlush/float(nmax)))
+    print("  Straight:       ({:9d})  {}".format(nStraight, nStraight/float(nmax)))
+    print("  Three of a kind:({:9d})  {}".format(nThreeOfAKind, nThreeOfAKind/float(nmax)))
+    print("  Two pair:       ({:9d})  {}".format(nTwoPair, nTwoPair/float(nmax)))
+    print("  One pair:       ({:9d})  {}".format(nOnePair, nOnePair/float(nmax)))
+
+
 if __name__== "__main__":
-    play(1000000)
-
-
-
-    
-        
+    play(100000)
