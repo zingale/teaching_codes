@@ -1,13 +1,17 @@
-# compute the odds of getting a given hand in straight 5-card poker.
+# Compute the odds of getting a given hand in straight 5-card poker.
+#
+# This requires python 3.x because of the Unicode handling
+#
 # M. Zingale
-
-from __future__ import print_function
 
 import random
 
-class card:
+class Card(object):
 
     def __init__(self, suit=1, rank=2):
+        if suit < 1 or suit > 4:
+            print("invalid suit, setting to 1")
+
         self.suit = suit
         self.rank = rank
 
@@ -40,7 +44,7 @@ class card:
         return unicode(self).encode('utf-8')
 
 
-class deck:
+class Deck(object):
     """ the deck is a collection of cards """
 
     def __init__(self):
@@ -54,13 +58,12 @@ class deck:
 
         for rank in range(self.minrank, self.maxrank+1):
             for suit in range(1, self.nsuits+1):
-                currentCard = card(rank=rank, suit=suit)
-                self.cards.append(currentCard)
+                self.cards.append(Card(rank=rank, suit=suit))
 
     def shuffle(self):
         random.shuffle(self.cards)
 
-    def getCards(self, num=1):
+    def deal(self, num=1):
         hand = []
 
         for n in range(num):
@@ -77,28 +80,23 @@ class deck:
 
 def play(nmax):
 
-    nStraightFlush = 0
-    nFourOfAKind = 0
-    nFullHouse = 0
-    nFlush = 0
-    nStraight = 0
-    nThreeOfAKind = 0
-    nTwoPair = 0
-    nOnePair = 0
+    n_straight_flush = 0
+    n_four_of_a_kind = 0
+    n_full_house = 0
+    n_flush = 0
+    n_straight = 0
+    n_three_of_a_kind = 0
+    n_two_pair = 0
+    n_pair = 0
 
     for n in range(nmax):
 
-        # create a deck
-        mydeck = deck()
-
-        # shuffle
+        mydeck = Deck()
         mydeck.shuffle()
 
         # get a hand
-        hand = mydeck.getCards(5)
+        hand = mydeck.deal(5)
         hand.sort()
-
-        #print hand[0], hand[1], hand[2], hand[3], hand[4]
 
         found = False
 
@@ -120,10 +118,8 @@ def play(nmax):
              hand[2].rank - 2 == \
              hand[3].rank - 3 == \
              hand[4].rank - 4)):
-            nStraightFlush += 1
-            #print "<<< Straight Flush >>>\n"
+            n_straight_flush += 1
             found = True
-
 
         # four of a kind
 
@@ -132,10 +128,8 @@ def play(nmax):
         if (not found and
             ((hand[0].rank == hand[1].rank == hand[2].rank == hand[3].rank) or
              (hand[1].rank == hand[2].rank == hand[3].rank == hand[4].rank))):
-            nFourOfAKind += 1
-            #print "<<< Four of a kind >>>\n"
+            n_four_of_a_kind += 1
             found = True
-
 
         # full house
 
@@ -146,10 +140,8 @@ def play(nmax):
               (hand[2].rank == hand[3].rank == hand[4].rank)) or
              ((hand[0].rank == hand[1].rank == hand[2].rank) and
               (hand[3].rank == hand[4].rank)))):
-            nFullHouse += 1
-            #print "<<< Full house >>>\n"
+            n_full_house += 1
             found = True
-
 
         # flush
 
@@ -160,10 +152,8 @@ def play(nmax):
              hand[2].suit == \
              hand[3].suit == \
              hand[4].suit)):
-            nFlush += 1
-            #print "<<< Flush >>>\n"
+            n_flush += 1
             found = True
-
 
         # straight
 
@@ -174,8 +164,7 @@ def play(nmax):
              hand[2].rank - 2 == \
              hand[3].rank - 3 == \
              hand[4].rank - 4)):
-            nStraight += 1
-            #print "<<< Straight >>>\n"
+            n_straight += 1
             found = True
 
 
@@ -187,50 +176,47 @@ def play(nmax):
             ((hand[0].rank == hand[1].rank == hand[2].rank) or
              (hand[1].rank == hand[2].rank == hand[3].rank) or
              (hand[2].rank == hand[3].rank == hand[4].rank))):
-            nThreeOfAKind += 1
-            #print "<<< Three of a kind >>>\n"
+            n_three_of_a_kind += 1
             found = True
 
 
         # two pair and one pair
-        if (not found):
+        if not found:
 
             numPairs = 0
 
-            if (hand[0].rank == hand[1].rank):
+            if hand[0].rank == hand[1].rank:
                 numPairs += 1
 
-            if (hand[1].rank == hand[2].rank):
+            if hand[1].rank == hand[2].rank:
                 numPairs += 1
 
-            if (hand[2].rank == hand[3].rank):
+            if hand[2].rank == hand[3].rank:
                 numPairs += 1
 
-            if (hand[3].rank == hand[4].rank):
+            if hand[3].rank == hand[4].rank:
                 numPairs += 1
 
             if numPairs == 2:
-                nTwoPair += 1
-                #print "<<< Two Pair >>>\n"
+                n_two_pair += 1
                 found = True
 
             elif numPairs == 1:
-                nOnePair += 1
-                #print "<<< One Pair >>>\n"
+                n_pair += 1
                 found = True
 
 
     print("Number of hands: ", nmax)
     print(" ")
-    print("  Straight Flush: ({:9d})  {}".format(nStraightFlush, nStraightFlush/float(nmax)))
-    print("  Four of a kind: ({:9d})  {}".format(nFourOfAKind, nFourOfAKind/float(nmax)))
-    print("  Full House:     ({:9d})  {}".format(nFullHouse, nFullHouse/float(nmax)))
-    print("  Flush:          ({:9d})  {}".format(nFlush, nFlush/float(nmax)))
-    print("  Straight:       ({:9d})  {}".format(nStraight, nStraight/float(nmax)))
-    print("  Three of a kind:({:9d})  {}".format(nThreeOfAKind, nThreeOfAKind/float(nmax)))
-    print("  Two pair:       ({:9d})  {}".format(nTwoPair, nTwoPair/float(nmax)))
-    print("  One pair:       ({:9d})  {}".format(nOnePair, nOnePair/float(nmax)))
+    print("  Straight Flush: ({:9d})  {}".format(n_straight_flush, n_straight_flush/float(nmax)))
+    print("  Four of a kind: ({:9d})  {}".format(n_four_of_a_kind, n_four_of_a_kind/float(nmax)))
+    print("  Full House:     ({:9d})  {}".format(n_full_house, n_full_house/float(nmax)))
+    print("  Flush:          ({:9d})  {}".format(n_flush, n_flush/float(nmax)))
+    print("  Straight:       ({:9d})  {}".format(n_straight, n_straight/float(nmax)))
+    print("  Three of a kind:({:9d})  {}".format(n_three_of_a_kind, n_three_of_a_kind/float(nmax)))
+    print("  Two pair:       ({:9d})  {}".format(n_two_pair, n_two_pair/float(nmax)))
+    print("  One pair:       ({:9d})  {}".format(n_pair, n_pair/float(nmax)))
 
 
 if __name__== "__main__":
-    play(100000)
+    play(1000000)
